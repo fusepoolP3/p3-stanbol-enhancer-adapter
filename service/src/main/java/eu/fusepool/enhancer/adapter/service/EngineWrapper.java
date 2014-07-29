@@ -17,12 +17,16 @@
 package eu.fusepool.enhancer.adapter.service;
 
 import eu.fusepool.p3.vocab.TRANSFORMER;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import org.apache.clerezza.jaxrs.utils.TrailingSlash;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
@@ -30,7 +34,12 @@ import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.web.viewable.RdfViewable;
+import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.ContentSource;
+import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.impl.ByteArraySource;
 
 /**
  *
@@ -39,10 +48,13 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 public class EngineWrapper {
     private final EnhancementEngine engine;
     private final Serializer serializer;
+    private final ContentItemFactory contentItemFactory;
+    private final Charset UTF8 = Charset.forName("UTF-8");
 
-    EngineWrapper(EnhancementEngine engine, Serializer serializer) {
+    EngineWrapper(EnhancementEngine engine, Serializer serializer, ContentItemFactory contentItemFactory) {
         this.engine = engine;
         this.serializer = serializer;
+        this.contentItemFactory = contentItemFactory;
     }
     
     @GET
@@ -66,6 +78,18 @@ public class EngineWrapper {
         node.addProperty(TRANSFORMER.supportedInputFormat, new PlainLiteralImpl("*/*"));
         //What we return is the GraphNode we created with a template path
         return new RdfViewable("Transformer", node, Transformers.class);
+    }
+    
+    @POST
+    public TripleCollection post(
+            final @HeaderParam("Content-type") String contentType, 
+            final String content) throws IOException, EngineException {
+        final ContentSource contentSource = new ByteArraySource(
+                content.getBytes(UTF8),
+                contentType);
+        final ContentItem contentItem = contentItemFactory.createContentItem(contentSource);
+        engine.computeEnhancements(contentItem);
+        return contentItem.getMetadata();
     }
     
 }

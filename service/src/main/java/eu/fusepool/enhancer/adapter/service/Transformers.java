@@ -139,7 +139,7 @@ public class Transformers {
         if (engine == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
-        return new EngineWrapper(engine, serializer);
+        return new EngineWrapper(engine, serializer, contentItemFactory);
     }
     
     

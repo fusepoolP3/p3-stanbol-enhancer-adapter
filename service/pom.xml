@@ -37,6 +37,14 @@
     </properties>
 
     <build>
+        <resources>
+			<resource>
+	        	<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+	        	<directory>${project.build.directory}/maven-shared-archive-resources</directory>
+			</resource>
+		</resources>
         <!-- make it an OSGi bundle -->
         <plugins>
             <plugin>
@@ -57,6 +65,23 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
                 <version>2.3.7</version>
+            </plugin>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>                   
+                    <execution>
+                        <id>copy-js-deps</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeTypes>js</includeTypes>
+                            <outputDirectory>${project.build.directory}/maven-shared-archive-resources/META-INF/resources/transformers/scripts/</outputDirectory>
+                        </configuration>
+                    </execution>
+                   
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -112,5 +137,17 @@
             <artifactId>vocab</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>jquery-amd</artifactId>
+			<version>1.7.1-alpha-1</version>
+			<type>js</type>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>jquery-ui-amd</artifactId>
+			<version>1.8.16-alpha-1</version>
+			<type>js</type>
+		</dependency>
     </dependencies>
 </project>
