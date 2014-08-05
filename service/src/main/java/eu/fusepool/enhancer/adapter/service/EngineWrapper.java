@@ -22,7 +22,9 @@ import java.nio.charset.Charset;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.apache.clerezza.jaxrs.utils.TrailingSlash;
 import org.apache.clerezza.rdf.core.MGraph;
@@ -83,12 +85,17 @@ public class EngineWrapper {
     @POST
     public TripleCollection post(
             final @HeaderParam("Content-type") String contentType, 
-            final String content) throws IOException, EngineException {
+            final String content) throws IOException {
         final ContentSource contentSource = new ByteArraySource(
                 content.getBytes(UTF8),
                 contentType);
         final ContentItem contentItem = contentItemFactory.createContentItem(contentSource);
-        engine.computeEnhancements(contentItem);
+        try {
+            engine.computeEnhancements(contentItem);
+        } catch (Exception e) {
+            throw new WebApplicationException(e.getMessage(), e, 
+                    Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+        }
         return contentItem.getMetadata();
     }
     
