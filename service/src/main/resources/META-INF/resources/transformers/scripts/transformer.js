@@ -7,7 +7,8 @@ var Transformer = {
             url: window.location,
             data: content,
             contentType: mediaType,
-            success: function(r) {alert("Result: "+r)}
+            success: function(r) {alert("Result: "+r)},
+            error: function(http,status, error) {alert(error+": "+http.responseText)}
         });
     }
 }
