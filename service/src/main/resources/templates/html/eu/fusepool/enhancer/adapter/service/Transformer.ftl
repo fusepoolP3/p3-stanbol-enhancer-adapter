@@ -8,10 +8,10 @@
 <html>
   <head>
     <title>Transformer</title>
-    <link type="text/css" rel="stylesheet" href="styles/multi-enhancer.css" />
-    <script src="scripts/almond-0.0.2-alpha-1.js" type="text/javascript"> </script>
-    <script src="scripts/jquery-amd-1.7.1-alpha-1.js" type="text/javascript"> </script>
-    <script src="scripts/transformer.js" type="text/javascript"> </script>
+    <link type="text/css" rel="stylesheet" href="../styles/multi-enhancer.css" />
+    <script src="../scripts/almond-0.0.2-alpha-1.js" type="text/javascript"> </script>
+    <script src="../scripts/jquery-amd-1.7.1-alpha-1.js" type="text/javascript"> </script>
+    <script src="../scripts/transformer.js" type="text/javascript"> </script>
   </head>
 
   <body>

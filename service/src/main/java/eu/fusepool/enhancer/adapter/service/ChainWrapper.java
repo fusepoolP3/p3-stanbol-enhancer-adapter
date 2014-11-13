@@ -17,8 +17,10 @@
 package eu.fusepool.enhancer.adapter.service;
 
 import eu.fusepool.p3.vocab.TRANSFORMER;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -26,6 +28,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
 import org.apache.clerezza.jaxrs.utils.TrailingSlash;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
@@ -36,27 +39,29 @@ import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.web.viewable.RdfViewable;
+import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentSource;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.impl.ByteArraySource;
 
 /**
  *
- * @author reto
+ * @author Rupert Westenthaler
  */
-public class EngineWrapper {
-    private final EnhancementEngine engine;
+public class ChainWrapper {
+    private static final Charset UTF8 = Charset.forName("UTF-8");
+    private final Chain chain;
     private final Serializer serializer;
-    private final ContentItemFactory contentItemFactory;
-    private final Charset UTF8 = Charset.forName("UTF-8");
+    private final EnhancementJobManager jobManager;
 
-    EngineWrapper(EnhancementEngine engine, Serializer serializer, ContentItemFactory contentItemFactory) {
-        this.engine = engine;
+    ChainWrapper(Chain chain, Serializer serializer, EnhancementJobManager jobManager) {
+        this.chain = chain;
         this.serializer = serializer;
-        this.contentItemFactory = contentItemFactory;
+        this.jobManager = jobManager;
     }
     
     @GET
@@ -83,20 +88,14 @@ public class EngineWrapper {
     }
     
     @POST
-    public TripleCollection post(
-            final @HeaderParam("Content-type") String contentType, 
-            final String content) throws IOException {
-        final ContentSource contentSource = new ByteArraySource(
-                content.getBytes(UTF8),
-                contentType);
-        final ContentItem contentItem = contentItemFactory.createContentItem(contentSource);
+    public ContentItem post(ContentItem contentItem) throws IOException {
         try {
-            engine.computeEnhancements(contentItem);
+            jobManager.enhanceContent(contentItem, chain);
         } catch (Exception e) {
             throw new WebApplicationException(e.getMessage(), e, 
                     Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
         }
-        return contentItem.getMetadata();
+        return contentItem;
     }
     
 }
