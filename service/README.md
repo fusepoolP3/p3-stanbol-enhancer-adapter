@@ -73,4 +73,19 @@ To execute a Stanbol component using the Transformer service one needs to send a
 
 The Stanbol Transformer does support the use of the `Content-Location` header to specify the URI of the parsed content starting with [STANBOL-1404](https://issues.apache.org/jira/browse/STANBOL-1404) (revision: 1638109). In case an earlier version is used the URI can be parsed by using the `uri` query parameter. The `Content-Type` header is expected to be defined and set to the media type of the parsed content. Some Engines (e.g. the [Tika Engine](http://stanbol.apache.org/docs/trunk/components/enhancer/engines/tikaengine) are capable of detecting the content type. In this case `application/octet-stream` can be set to indicate that the content type of the parsed media is not known.
 
+Transformer Registry Support
+--------------------
+
+Apache Stanbol Enhancer Transformer Service does support the registration of Fusepool Transformers for currently active Enhancement Engines and Chains.
+
+For enabling this features the Transformer Service needs to be configured with the #
+
+* __Transformer Registry URI__ _(transformer.registry)_: The URI of the LDP Basic container used by the Fusepool Transformer Registry.
+* __Stanbol Base URI__ _(stanbol.base.uri)_: The base URI of the Stanbol instance (e.g. `http://{host}:{port}/stanbol`). This URI is required for registering Transformers with the Transformer Factory. 
+
+The following figure shows the configuration dialog.
+
+![Configuration Dialog](transformer-adapter-config.png)
+
+_NOTE:_ configuring a `localhost` URI as `stanbol.base.uri` does not make sense for real world use cases. A public accessible URI is needed for accessing Transformers registered with a Transformer Registry. Otherwise Components looking up transformers via the registry will not be able to access it.
 
