@@ -17,6 +17,8 @@
 package eu.fusepool.enhancer.adapter.service;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -49,12 +51,17 @@ import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.config.ConnectionConfig;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.resource.LayoutConfiguration;
@@ -69,7 +76,10 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.impl.ByteArraySource;
+import org.apache.stanbol.enhancer.servicesapi.impl.ChainsTracker;
+import org.apache.stanbol.enhancer.servicesapi.impl.EnginesTracker;
 import org.apache.stanbol.enhancer.servicesapi.impl.SingleEngineChain;
+import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +87,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Upload file for which the enhancements are to be computed
  */
-@Component
+@Component(policy = ConfigurationPolicy.OPTIONAL,
+    metatype = true,
+    immediate = true)
 @Service(Object.class)
 @Property(name="javax.ws.rs", boolValue=true)
 @Path("transformers")
@@ -87,31 +99,122 @@ public class Transformers {
      * Using slf4j for logging
      */
     private static final Logger log = LoggerFactory.getLogger(Transformers.class);
-        
+    
+    /**
+     * Allows to configure the transformer registry to register currently available
+     * Enhancement Engines and Chain transformers with.
+     */
+    @Property(value="http://sandbox.fusepool.info:8181/ldp/tr-ldpc")
+    public static final String PROP_TRANSFORMER_REGISTRY_URI = "transformer.registry";
+    /**
+     * The base URI of the Stanbol instance. Required for the registration with the
+     * transformer registry.
+     */
+    @Property(value="")
+    public static final String PROP_BASE_URI = "stanbol.base.uri";
+    
     @Reference
     private ContentItemFactory contentItemFactory;
     
     @Reference
     private EnhancementJobManager enhancementJobManager;
     
-    @Reference
-    private ChainManager chainManager;
+    private ChainsTracker chainManager;
     
     @Reference
     private Serializer serializer;
     
-    @Reference
-    private EnhancementEngineManager engineManager;
+    private EnginesTracker engineManager;
+
+
+	private URI transformerRegistry;
+	private CloseableHttpClient transformerRegistryHttpClient;
     
+	private URI baseUri;
+	
     
     @Activate
-    protected void activate(ComponentContext context) {
+    protected void activate(ComponentContext context) throws ConfigurationException {
         log.info("The {} service is being activated",getClass().getSimpleName());
+        Object value = context.getProperties().get(PROP_BASE_URI);
+        if(value != null && !StringUtils.isBlank(value.toString())){
+        	String base = value.toString();
+        	//we do need the tailing '/'
+        	if(base.charAt(base.length()-1) != '/') {
+        	    base = base + '/';
+            }
+            log.info("Base URI: {}",value);
+        	try {
+        		baseUri = new URI(base);
+        	} catch (URISyntaxException e){
+        		throw new ConfigurationException(PROP_BASE_URI, 
+        				"The parsed Base URI MUST BE an valid URI", e);
+        	}
+        }
+        value = context.getProperties().get(PROP_TRANSFORMER_REGISTRY_URI);
+        if(value != null && !StringUtils.isBlank(value.toString())){
+        	log.info("Transformer Registry: {}",value);
+        	try {
+        		transformerRegistry = new URI(value.toString());
+        	} catch (URISyntaxException e){
+        		throw new ConfigurationException(PROP_TRANSFORMER_REGISTRY_URI, 
+        				"The parsed Transformer Registry location MUST BE an valid URI", e);
+        	}
+        	if(baseUri == null){
+        	    log.warn("The Transformer Registry requires also the '{}' to be set!"
+        	            + "Please configure the Base URI for this Stanbol Instance. "
+        	            + "Otherwise transformers for Engines and Chains will NOT be "
+        	            + "registered with the Transformer Registry {}", 
+        	            PROP_BASE_URI, transformerRegistry);
+        	    transformerRegistry = null;
+        	}
+        }
+        if(transformerRegistry != null){
+            //we need a to configure a Transformer Registration Manager. This is
+            //implemented as a ServiceTrackerCustomizer for the ChainsTracker and
+            //EnginesTracker.
+            int timeout = 5000; //5sec .. TODO: make configureable
+            RequestConfig requestConfig = RequestConfig.custom()
+                    .setConnectTimeout(timeout)
+                    .setConnectionRequestTimeout(timeout)
+                    .setSocketTimeout(timeout).build();
+            transformerRegistryHttpClient = HttpClientBuilder.create()
+                    .setDefaultRequestConfig(requestConfig).build();
+            TransformerRegistrationManager transformerRegistrationManager = 
+                    new TransformerRegistrationManager(
+                            context.getBundleContext(), transformerRegistryHttpClient, 
+                            baseUri, transformerRegistry);
+            chainManager = new ChainsTracker(context.getBundleContext(), null, 
+                    transformerRegistrationManager);
+            engineManager = new EnginesTracker(context.getBundleContext(), null, 
+                    transformerRegistrationManager);
+        } else {
+            chainManager = new ChainsTracker(context.getBundleContext());
+            engineManager = new EnginesTracker(context.getBundleContext());
+        }
+        chainManager.open();
+        engineManager.open();
     }
     
     @Deactivate
     protected void deactivate(ComponentContext context) {
         log.info("The {} service is being activated", getClass().getSimpleName());
+        transformerRegistry = null;
+        if(chainManager != null){
+            chainManager.close();
+        }
+        if(engineManager != null){
+            engineManager.close();
+        }
+        //in case we have a configured TransformerRegistry we need also to
+        //close the HttpClient used to register EnhancementEngines and Chains
+        //with the registry.
+        if(transformerRegistryHttpClient != null){
+            try {
+                transformerRegistryHttpClient.close();
+            } catch (IOException e) { /* ignore */}
+            transformerRegistryHttpClient = null;
+        }
     }
     
     /**

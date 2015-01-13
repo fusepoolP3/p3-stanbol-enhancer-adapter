@@ -26,10 +26,19 @@ import org.apache.clerezza.rdf.core.UriRef;
  */
 public class Ontology {
 
+    private static final String TRLDPC_NS = "http://vocab.fusepool.info/trldpc#";
+
     //classes
     public static final UriRef TransformerIndex = new UriRef("http://fusepool.eu/ontology/enhancer-adapter#transformerIndex");
+    /**
+     * The Transformer Registration type
+     */
+    public static final UriRef TransformerRegistration = new UriRef(TRLDPC_NS + "TransformerRegistration");
     
     //properties
     public static final UriRef transformer = new UriRef("http://fusepool.eu/ontology/enhancer-adapter#transformer");
-    
+    /**
+     * The transformer property of a {@link #TransformerRegistration} instance
+     */
+    public static final UriRef registeredTransformer = new UriRef(TRLDPC_NS + "transformer");
 }
