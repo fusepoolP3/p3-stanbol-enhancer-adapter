@@ -33,8 +33,12 @@
     <name>Fusepool P3: Stanbol Enhancer Adapter Launcher</name>
     <description>Custom Stanbol launcher featuring the teh P3 Extractor Frontend</description>
 
+    <properties>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+    </properties>
+
     <build>
-        <finalName>stanbol-adapter</finalName>
+        <finalName>${finalName}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
