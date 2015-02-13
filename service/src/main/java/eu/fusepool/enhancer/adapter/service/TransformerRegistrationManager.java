@@ -56,11 +56,14 @@ public class TransformerRegistrationManager implements ServiceTrackerCustomizer 
     private Map<ServiceReference<?>, URI> registeredServices = new HashMap<>();
     private ReadWriteLock registeredServicesLock = new ReentrantReadWriteLock();
 
-    public TransformerRegistrationManager(BundleContext bc, CloseableHttpClient httpClient, URI baseUri, URI transformerRegistry) {
+    private final boolean registerEngines;
+
+    public TransformerRegistrationManager(BundleContext bc, CloseableHttpClient httpClient, URI baseUri, URI transformerRegistry, boolean registerEngines) {
         this.bc = bc;
         this.baseUri = baseUri;
         this.transformerRegistry = transformerRegistry;
         this.httpClient = httpClient;
+        this.registerEngines = registerEngines;
         
     }
 
@@ -71,7 +74,7 @@ public class TransformerRegistrationManager implements ServiceTrackerCustomizer 
         if(service instanceof Chain){
             //register a new Chain Transformer
             registrationUri = register((Chain) service);
-        } else if(service instanceof EnhancementEngine){
+        } else if(service instanceof EnhancementEngine && registerEngines){
             //register a new Engine Transformer
             registrationUri = register((EnhancementEngine) service);
         }

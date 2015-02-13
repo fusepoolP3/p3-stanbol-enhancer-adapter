@@ -107,6 +107,16 @@ public class Transformers {
     @Property(value="http://sandbox.fusepool.info:8181/ldp/tr-ldpc")
     public static final String PROP_TRANSFORMER_REGISTRY_URI = "transformer.registry";
     /**
+     * Allows to enable/disable the registration of single {@link EnhancementEngine}s
+     * as Fusepool Transformers in the configured {@link #PROP_TRANSFORMER_REGISTRY_URI}
+     */
+    @Property(boolValue=Transformers.DEFAULT_REGISTER_ENGINES)
+    public static final String PROP_REGISTER_ENGINES = "register.engines";
+    /**
+     * The default for the {@link #PROP_REGISTER_ENGINES} property
+     */
+    public static final boolean DEFAULT_REGISTER_ENGINES = false;
+    /**
      * The base URI of the Stanbol instance. Required for the registration with the
      * transformer registry.
      */
@@ -170,6 +180,16 @@ public class Transformers {
         	}
         }
         if(transformerRegistry != null){
+            value = context.getProperties().get(PROP_REGISTER_ENGINES);
+            boolean registerEngines;
+            if(value instanceof Boolean){
+                registerEngines = ((Boolean)value).booleanValue();
+            } else if(value != null){
+                registerEngines = Boolean.parseBoolean(value.toString());
+            } else {
+                registerEngines = DEFAULT_REGISTER_ENGINES;
+            }
+            log.info("  ... registering Engines: {}", registerEngines);
             //we need a to configure a Transformer Registration Manager. This is
             //implemented as a ServiceTrackerCustomizer for the ChainsTracker and
             //EnginesTracker.
@@ -183,7 +203,7 @@ public class Transformers {
             TransformerRegistrationManager transformerRegistrationManager = 
                     new TransformerRegistrationManager(
                             context.getBundleContext(), transformerRegistryHttpClient, 
-                            baseUri, transformerRegistry);
+                            baseUri, transformerRegistry, registerEngines);
             chainManager = new ChainsTracker(context.getBundleContext(), null, 
                     transformerRegistrationManager);
             engineManager = new EnginesTracker(context.getBundleContext(), null, 
