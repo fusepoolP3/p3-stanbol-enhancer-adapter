@@ -1,0 +1,11 @@
+language: java
+before_install: mvn install -DskipTests=true -DfinalName=stanbol-adapter-$TRAVIS_TAG
+deploy:
+  provider: releases
+  api_key:
+    secure: EsoEKEPqqveofrc52W5H+RyKBYkysJXJeUdwEpEg5Jv+ap5hDx4YwvQV9JM+VyG3wOoF0vCWvHA/GPfY11Fs7qT6M7o2naeudcNyaEoeBz1ylxjXK/GZelKLkDAGwdHmRjBZl2fTLKoMlTzVhgBULjVclN4ejXF7m/nuZ87ViqU=
+  file: launcher/target/stanbol-adapter-$TRAVIS_TAG.jar
+  on:
+    repo: fusepoolP3/p3-stanbol-enhancer-adapter
+    tags: true
+    all_branches: true
