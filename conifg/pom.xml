@@ -16,13 +16,16 @@
     <version>1.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>stanbol-enhancer-adapter-service</artifactId>
+  <artifactId>stanbol-config-service</artifactId>
   <version>1.0.0-SNAPSHOT</version>
 
   <packaging>bundle</packaging>
 
-  <name>Fusepool P3: Stanbol Enhancer Adapter Service</name>
-  <description>Provides the Fusepool P3 transformer API for stanbol enhancers.</description>
+  <name>Fusepool P3: Stanbol Configuration Service</name>
+  <description>
+    Provides a Service that allows to confige Stanbol with a
+    Fusepool P3 Plattform
+  </description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -48,25 +51,8 @@
         <artifactId>maven-bundle-plugin</artifactId>
       </plugin>
       <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-js-deps</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <includeTypes>js</includeTypes>
-              <outputDirectory>${project.build.directory}/maven-shared-archive-resources/META-INF/resources/transformers/scripts/</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.apache.sling</groupId>
         <artifactId>maven-sling-plugin</artifactId>
-        <version>2.1.0</version>
       </plugin>
     </plugins>
   </build>
@@ -96,10 +82,10 @@
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.utils</artifactId>
     </dependency>
-    <dependency>
+    <!-- dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
-    </dependency>
+    </dependency -->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
@@ -116,7 +102,7 @@
       <groupId>eu.fusepool.p3</groupId>
       <artifactId>vocab</artifactId>
     </dependency>
-    <dependency>
+    <!-- dependency>
       <groupId>org.codehaus.mojo</groupId>
       <artifactId>jquery-amd</artifactId>
       <type>js</type>
@@ -125,6 +111,6 @@
       <groupId>org.codehaus.mojo</groupId>
       <artifactId>jquery-ui-amd</artifactId>
       <type>js</type>
-    </dependency>
+    </dependency -->
   </dependencies>
 </project>
