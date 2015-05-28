@@ -225,6 +225,7 @@ public class ConfigService {
             config.put(PROP_STANBOL_BASE_URI, stanbolBaseUri);
             config.put(PROP_TRANSFORMER_REGISTRY_URI, transformerRegistryUri);
             try {
+                transformerAdapterConfig.setBundleLocation(null);
                 transformerAdapterConfig.update(config);
             } catch (IOException e) {
                 throw new WebApplicationException("Unable to set configuration!", e);
