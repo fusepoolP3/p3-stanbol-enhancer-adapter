@@ -28,7 +28,11 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -107,9 +111,38 @@ public class ConfigService {
     protected void deactivate(ComponentContext context) {
         log.info("> deactivating {}",getClass().getName());
     }
+    /**
+     * {@link PUT} version of the {@link #config(String, String, String, UriInfo, HttpHeaders) config}
+     * method
+     */
+    @PUT
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response configPut(@FormParam("ldp") String ldpBaseUri,
+            @FormParam("stanbol") String stanbolBaseUri, 
+            @FormParam("fusepool") String platformUri,
+            @Context final UriInfo uriInfo, 
+            @Context HttpHeaders headers) {
+        return config(ldpBaseUri, stanbolBaseUri, platformUri, uriInfo, headers);
+    }
     
     /**
-     * 
+     * {@link POST} version of the {@link #config(String, String, String, UriInfo, HttpHeaders) config}
+     * method
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response configPost(@FormParam("ldp") String ldpBaseUri,
+            @FormParam("stanbol") String stanbolBaseUri, 
+            @FormParam("fusepool") String platformUri,
+            @Context final UriInfo uriInfo, 
+            @Context HttpHeaders headers) {
+        return config(ldpBaseUri, stanbolBaseUri, platformUri, uriInfo, headers);
+    }
+    
+    /**
+     * Configures this Stanbol instance for a Fusepool Plattform
      * @param ldpBaseUri allows to directly configure the LDP base URI
      * @param stanbolBaseUri allows to directly configure the Stanbol Base URI
      * @param platformUri The Fusepool Platform URI. A LDP context containing

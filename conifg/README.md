@@ -40,11 +40,11 @@ The [Fusepool Stanbol Launcher](http://github.com/fusepoolP3/p3-stanbol-launcher
 Usage
 -----
 
-This module provide a configuration service under `{stanbol-root}/fusepool/config`. A GET request to this URL can be used for the (re-)configuration of the [Fusepool Transformer Adapter](../service) service.
+This module provide a configuration service under `{stanbol-root}/fusepool/config`. A POST request to this URL can be used for the (re-)configuration of the [Fusepool Transformer Adapter](../service) service.
 
 A typical request to this service needs to provide the LDP context providing the configuration of the Fusepool Plattform via the `fusepool` parameter. The following listing shows a typical configuration request
 
-    curl "http://sandbox.fusepool.info:8304/fusepool/config/?fusepool=http%3A%2F%2Fsandbox.fusepool.info%3A8181%2Fldp%2Fplatform"
+    curl -X "POST" -d "fusepool=http%3A%2F%2Fsandbox.fusepool.info%3A8181%2Fldp%2Fplatform" "http://sandbox.fusepool.info:8304/fusepool/config/"
 
 The service responses with the JSON encoded map of the used configuration parameters set to the [Fusepool Transformer Adapter](../service) service.
 
@@ -54,6 +54,8 @@ The service responses with the JSON encoded map of the used configuration parame
     }
 
 As mentioned above the value of the `transformer.registry` parameter is retrieved from the parsed Fusepool Platform LDP context. The `stanbol.base.uri` is extracted from the request URI of the caller from the configuration service. In the above example this is `http://sandbox.fusepool.info:8304`.
+
+_NOTE:_ The configuration service also allows `GET` and `PUT` requests as alternative to `POST`.
 
 ### Parameters
 
