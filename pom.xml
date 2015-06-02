@@ -57,7 +57,7 @@
 
     <modules>
         <module>service</module>
-        <module>conifg</module>
+        <module>config</module>
         <module>bundlelist</module>
     </modules>
     
