@@ -30,7 +30,7 @@
   <body>
     <h1>Transformers</h1>
     <@ldpath path="ont:transformer">
-    Tramsformer: <a href="<@ldpath path="."/>"><@ldpath path="."/></a><br/>
+    Transformer: <a href="<@ldpath path="."/>"><@ldpath path="."/></a><br/>
     </@ldpath>
     <@ldpath path="rdfs:comment"/>
     
