@@ -14,6 +14,7 @@
     <groupId>eu.fusepool.p3.stanbol-enhancer-adapter</groupId>
     <artifactId>stanbol-enhancer-adapter</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <relativePath>..</relativePath>
   </parent>
 
   <artifactId>stanbol-config-service</artifactId>
@@ -78,10 +79,6 @@
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.utils</artifactId>
     </dependency>
-    <!-- dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-    </dependency -->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
@@ -98,15 +95,5 @@
       <groupId>eu.fusepool.p3</groupId>
       <artifactId>vocab</artifactId>
     </dependency>
-    <!-- dependency>
-      <groupId>org.codehaus.mojo</groupId>
-      <artifactId>jquery-amd</artifactId>
-      <type>js</type>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.mojo</groupId>
-      <artifactId>jquery-ui-amd</artifactId>
-      <type>js</type>
-    </dependency -->
   </dependencies>
 </project>
